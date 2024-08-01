@@ -6,17 +6,21 @@ using System.Threading;
 using TMPro;
 using UnityEngine;
 
-public class SocketListener : MonoBehaviour
+public class ListPy : MonoBehaviour
 {
     private TcpListener tcpListener;
     private Thread listenerThread;
     private bool isRunning;
 
-    
+    public GameObject neck;
+    public GameObject target;
+    float rotx = 0;
+
+    float posx, posy = 0;
 
     void Start()
     {
-        StartListening("192.168.0.108", 5009);
+        StartListening("127.0.0.1", 5000);
     }
 
     void StartListening(string ipAddress, int port)
@@ -24,6 +28,17 @@ public class SocketListener : MonoBehaviour
         isRunning = true;
         listenerThread = new Thread(() => ListenForClients(ipAddress, port));
         listenerThread.Start();
+    }
+
+    private void Update()
+    {
+        if (isRunning)
+        {
+            Quaternion targetRotation = Quaternion.Euler(-90, 180-rotx, 90);
+            neck.transform.rotation = targetRotation;
+
+            target.transform.position = new Vector3(posx, 0, posy);
+        }
     }
 
     private void ListenForClients(string ipAddress, int port)
@@ -78,8 +93,11 @@ public class SocketListener : MonoBehaviour
             string[] stringArray = receivedData.Split(',');
 
             Debug.Log("Received data: " + receivedData);
-    
 
+            rotx = float.Parse(stringArray[0]);
+
+            posx = float.Parse(stringArray[2]);
+            posy = float.Parse(stringArray[3]);
 
         }
 
